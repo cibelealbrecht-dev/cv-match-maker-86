@@ -178,7 +178,7 @@ export function buildAtsResume(resume: string): string {
     if (!arr.includes(value)) arr.push(value);
   };
 
-  const name = lines[0];
+  const name = lines[0] ?? "";
   let current: string | null = null;
 
   for (const line of lines.slice(1)) {
