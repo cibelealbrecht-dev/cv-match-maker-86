@@ -1,21 +1,5 @@
 // Análise determinística (sem aleatoriedade) entre vaga e currículo.
 
-const STOPWORDS = new Set(
-  `a o as os um uma uns umas de do da dos das em no na nos nas por para com sem sob sobre entre ate até
-   e ou mas que se ao aos à às pelo pela pelos pelas seu sua seus suas nosso nossa este esta esse essa
-   isso isto aquele aquela ser estar ter haver foi sao são será serão como mais menos muito muita muitos
-   muitas todo toda todos todas cada qual quais quando onde porque pois já ainda também apenas outro outra
-   outros outras nao não sim bem bom boa vaga empresa candidato profissional area área nivel nível anos
-   ano experiencia experiência experiencias experiências conhecimento conhecimentos atividades atividade
-   requisitos requisito desejavel desejável diferencial responsabilidades responsabilidade principais
-   trabalho trabalhar realizar fazer atuar atuacao atuação equipe time dia dias mes meses horario horário
-   beneficios benefícios salario salário vale contrato clt pj home office presencial hibrido híbrido
-   nossa nosso sera serao busca buscamos procuramos voce você seja seus suas junto atraves através
-   forma novos nova novas novo`
-    .split(/\s+/)
-    .filter(Boolean),
-);
-
 export function normalize(text: string) {
   return text
     .normalize("NFD")
@@ -23,19 +7,191 @@ export function normalize(text: string) {
     .toLowerCase();
 }
 
-function tokens(text: string) {
-  return normalize(text)
-    .replace(/[^a-z0-9+#.\s-]/g, " ")
-    .split(/\s+/)
-    .map((t) => t.replace(/^[-.]+|[-.]+$/g, ""))
-    .filter((t) => t.length >= 3 && !STOPWORDS.has(t) && !/^\d+$/.test(t));
+/** Remove qualquer sintaxe Markdown bruta do texto. */
+export function stripMarkdown(text: string) {
+  return text
+    .replace(/\r\n?/g, "\n")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .split("\n")
+    .map((line) =>
+      line
+        .replace(/^\s{0,3}#{1,6}\s*/, "")
+        .replace(/^\s{0,3}>\s?/, "")
+        .replace(/^\s*[-*+•–—]\s+/, "")
+        .replace(/^\s*\d+[.)]\s+/, "")
+        .replace(/\*\*([^*]+)\*\*/g, "$1")
+        .replace(/__([^_]+)__/g, "$1")
+        .replace(/\*([^*]+)\*/g, "$1")
+        .replace(/_([^_]+)_/g, "$1")
+        .replace(/[*_#`]+/g, "")
+        .replace(/^\s*[-–—]{2,}\s*$/, "")
+        .replace(/\s{2,}/g, " ")
+        .trimEnd(),
+    )
+    .join("\n");
 }
+
+/** Termos profissionais reconhecidos (competências, ferramentas, conceitos). */
+const SKILL_TERMS = [
+  "marketing digital",
+  "marketing de conteudo",
+  "midias sociais",
+  "redes sociais",
+  "google analytics",
+  "google ads",
+  "google sheets",
+  "google workspace",
+  "google data studio",
+  "looker studio",
+  "meta ads",
+  "facebook ads",
+  "instagram",
+  "linkedin",
+  "tiktok",
+  "seo",
+  "sem",
+  "crm",
+  "erp",
+  "sap",
+  "excel",
+  "power bi",
+  "powerpoint",
+  "word",
+  "canva",
+  "figma",
+  "photoshop",
+  "trello",
+  "notion",
+  "jira",
+  "slack",
+  "analise de dados",
+  "analise de metricas",
+  "analise de indicadores",
+  "indicadores de desempenho",
+  "kpis",
+  "kpi",
+  "relatorios",
+  "relatorio",
+  "dashboards",
+  "dashboard",
+  "campanhas",
+  "campanha",
+  "planilhas",
+  "planilha",
+  "copywriting",
+  "redacao",
+  "branding",
+  "comunicacao",
+  "comunicacao interna",
+  "atendimento ao cliente",
+  "gestao de projetos",
+  "gestao de equipes",
+  "gestao de tempo",
+  "organizacao",
+  "proatividade",
+  "trabalho em equipe",
+  "ingles",
+  "espanhol",
+  "sql",
+  "python",
+  "javascript",
+  "typescript",
+  "react",
+  "node",
+  "java",
+  "git",
+  "api",
+  "apis",
+  "banco de dados",
+  "metodologias ageis",
+  "scrum",
+  "kanban",
+  "e-mail marketing",
+  "email marketing",
+  "funil de vendas",
+  "vendas",
+  "prospeccao",
+  "negociacao",
+  "pesquisa de mercado",
+  "benchmarking",
+  "storytelling",
+  "edicao de video",
+  "design grafico",
+  "ux",
+  "ui",
+  "wordpress",
+  "hubspot",
+  "rd station",
+  "salesforce",
+  "controle de estoque",
+  "logistica",
+  "financeiro",
+  "contas a pagar",
+  "contas a receber",
+  "recrutamento e selecao",
+  "departamento pessoal",
+  "rotinas administrativas",
+  "suporte tecnico",
+  "documentacao",
+  "treinamento",
+  "apresentacoes",
+];
+
+/** Palavras isoladas que nunca devem virar palavra-chave. */
+const STOPWORDS = new Set(
+  normalize(
+    `a o as os um uma uns umas de do da dos das em no na nos nas por para com sem sob sobre entre ate
+     e ou mas que se ao aos à às pelo pela pelos pelas seu sua seus suas nosso nossa nossos nossas este esta
+     estes estas esse essa esses essas isso isto aquele aquela aqueles aquelas ser estar ter haver fazer foi
+     era sao serao sera somos estamos estao temos tem tinha havia como mais menos muito muita muitos muitas
+     todo toda todos todas cada qual quais quando onde porque pois ja ainda tambem apenas outro outra outros
+     outras nao sim bem bom boa melhor melhores grande grandes pequeno pequena novo nova novos novas
+     vaga vagas empresa empresas candidato candidata candidatos profissional profissionais pessoa pessoas
+     area areas nivel niveis junior pleno senior estagio estagiario trainee aprendiz
+     ano anos mes meses dia dias semana horario horas periodo
+     experiencia experiencias conhecimento conhecimentos atividade atividades requisito requisitos
+     desejavel desejaveis diferencial diferenciais responsabilidade responsabilidades principais
+     trabalho trabalhar realizar atuar atuacao equipe time
+     beneficios beneficio salario vale refeicao transporte contrato clt pj home office presencial hibrido
+     busca buscamos buscar procuramos procurar oferecemos oferecer voce voces nos seja sejam junto atraves
+     forma formas criar cria criando desenvolver apoio apoiar ajudar auxiliar participar acompanhar
+     diferente diferentes varios varias demais entre alem sempre nunca alguns algumas
+     local cidade estado brasil remoto curso cursando superior ensino graduacao formacao
+     capacidade facilidade vontade interesse gosto perfil oportunidade desafio desafios crescimento
+     cultura valores missao visao clientes cliente produto produtos servico servicos projeto projetos
+     dados informacao informacoes resultado resultados meta metas processo processos acoes acao
+     ferramenta ferramentas plataforma plataformas sistema sistemas rotina rotinas`,
+  )
+    .split(/\s+/)
+    .filter(Boolean),
+);
 
 function stem(word: string) {
   return word
-    .replace(/(coes|cao|ções|ção)$/, "ca")
+    .replace(/(coes|cao)$/, "ca")
     .replace(/(mentos|mento)$/, "ment")
     .replace(/(s|es)$/, "");
+}
+
+function normalizedWords(text: string) {
+  return normalize(stripMarkdown(text))
+    .replace(/[^a-z0-9+#.\s-]/g, " ")
+    .split(/\s+/)
+    .map((t) => t.replace(/^[-.]+|[-.]+$/g, ""))
+    .filter(Boolean);
+}
+
+function isMeaningfulWord(word: string) {
+  if (word.length < 3) return false;
+  if (/^[\d.+#-]+$/.test(word)) return false;
+  if (!/[a-z]/.test(word)) return false;
+  if (STOPWORDS.has(word)) return false;
+  // verbos comuns no infinitivo e gerúndio não são competências
+  if (/(ar|er|ir|ando|endo|indo)$/.test(word) && word.length <= 9) return false;
+  return true;
 }
 
 export type Analysis = {
@@ -45,40 +201,96 @@ export type Analysis = {
   suggestions: string[];
 };
 
-function titleCase(word: string, original: Map<string, string>) {
-  const raw = original.get(word) ?? word;
-  if (raw.length <= 3) return raw.toUpperCase();
-  return raw.charAt(0).toUpperCase() + raw.slice(1);
+const ACRONYMS = new Set([
+  "seo",
+  "sem",
+  "crm",
+  "erp",
+  "sap",
+  "sql",
+  "api",
+  "apis",
+  "kpi",
+  "kpis",
+  "ux",
+  "ui",
+]);
+
+function pretty(term: string, display: Map<string, string>) {
+  const original = display.get(term);
+  if (original) return original;
+  return term
+    .split(" ")
+    .map((w) =>
+      ACRONYMS.has(w) || w.length <= 2
+        ? w.toUpperCase()
+        : w.charAt(0).toUpperCase() + w.slice(1),
+    )
+    .join(" ");
+}
+
+function buildDisplayMap(text: string) {
+  const clean = stripMarkdown(text);
+  const map = new Map<string, string>();
+  const words = clean.split(/[^A-Za-zÀ-ÿ0-9+#.-]+/).filter(Boolean);
+  for (let i = 0; i < words.length; i++) {
+    for (let n = 1; n <= 3 && i + n <= words.length; n++) {
+      const phrase = words.slice(i, i + n).join(" ");
+      const key = normalize(phrase);
+      if (!map.has(key)) map.set(key, phrase);
+    }
+  }
+  return map;
+}
+
+function extractKeywords(job: string) {
+  const jobNorm = normalize(stripMarkdown(job));
+  const terms: string[] = [];
+  const seen = new Set<string>();
+
+  // 1) termos profissionais conhecidos (inclui expressões compostas)
+  for (const term of SKILL_TERMS) {
+    const re = new RegExp(`(^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z0-9]|$)`);
+    if (re.test(jobNorm) && !seen.has(term)) {
+      seen.add(term);
+      terms.push(term);
+    }
+  }
+
+  // 2) palavras significativas restantes, por frequência
+  const words = normalizedWords(job).filter(isMeaningfulWord);
+  const freq = new Map<string, number>();
+  for (const w of words) freq.set(w, (freq.get(w) ?? 0) + 1);
+
+  const covered = new Set(terms.flatMap((t) => t.split(" ")));
+  const ranked = [...freq.entries()]
+    .filter(([w]) => !covered.has(w) && !seen.has(w))
+    .sort((a, b) => b[1] - a[1] || b[0].length - a[0].length || a[0].localeCompare(b[0]))
+    .slice(0, Math.max(0, 20 - terms.length))
+    .map(([w]) => w);
+
+  return [...terms, ...ranked].slice(0, 20);
+}
+
+function hasTerm(term: string, resumeNorm: string, resumeStems: Set<string>) {
+  if (term.includes(" ")) {
+    return resumeNorm.includes(term);
+  }
+  return resumeStems.has(stem(term)) || resumeNorm.includes(term);
 }
 
 export function analyze(job: string, resume: string): Analysis {
-  const jobTokens = tokens(job);
-  const resumeTokens = tokens(resume);
+  const keywords = extractKeywords(job);
+  const display = buildDisplayMap(job);
 
-  // mapa de versão "original" para exibição
-  const display = new Map<string, string>();
-  for (const raw of job.split(/[^A-Za-zÀ-ÿ0-9+#.-]+/)) {
-    const key = normalize(raw).replace(/^[-.]+|[-.]+$/g, "");
-    const clean = raw.replace(/^[-.]+|[-.]+$/g, "");
-    if (key && clean && !display.has(key)) display.set(key, clean);
-  }
-
-  const resumeStems = new Set(resumeTokens.map(stem));
-
-  const freq = new Map<string, number>();
-  for (const t of jobTokens) freq.set(t, (freq.get(t) ?? 0) + 1);
-
-  const ranked = [...freq.entries()].sort(
-    (a, b) => b[1] - a[1] || b[0].length - a[0].length || a[0].localeCompare(b[0]),
-  );
-
-  const keywords = ranked.slice(0, 30).map(([w]) => w);
+  const resumeNorm = normalize(stripMarkdown(resume));
+  const resumeStems = new Set(normalizedWords(resume).map(stem));
 
   const found: string[] = [];
   const missing: string[] = [];
   for (const k of keywords) {
-    if (resumeStems.has(stem(k))) found.push(titleCase(k, display));
-    else missing.push(titleCase(k, display));
+    if (hasTerm(k, resumeNorm, resumeStems)) found.push(pretty(k, display));
+    else missing.push(pretty(k, display));
   }
 
   const score = keywords.length
@@ -166,14 +378,15 @@ const CONTACT_RE = /(@|https?:\/\/|linkedin|github|\(\d{2}\)|\d{4,5}-?\d{4})/i;
 
 /** Reorganiza o currículo original sem inventar conteúdo novo. */
 export function buildAtsResume(resume: string): string {
-  const lines = resume
-    .split(/\r?\n/)
+  const lines = stripMarkdown(resume)
+    .split(/\n/)
     .map((l) => l.trim())
-    .filter(Boolean);
+    .filter((l) => l && !/^[-=_·•]+$/.test(l));
   if (!lines.length) return "";
 
   const sections = new Map<string, string[]>();
   const push = (key: string, value: string) => {
+    if (!value) return;
     if (!sections.has(key)) sections.set(key, []);
     const arr = sections.get(key)!;
     if (!arr.includes(value)) arr.push(value);
@@ -189,11 +402,10 @@ export function buildAtsResume(resume: string): string {
       continue;
     }
     if (CONTACT_RE.test(line) && (!current || current === "CONTATO")) {
-      push("CONTATO", line.replace(/^[-•*]\s*/, ""));
+      push("CONTATO", line);
       continue;
     }
-    const content = line.replace(/^[-•*]\s*/, "");
-    push(current ?? "EXPERIÊNCIA PROFISSIONAL", content);
+    push(current ?? "EXPERIÊNCIA PROFISSIONAL", line);
   }
 
   const out: string[] = [name.toUpperCase(), ""];
@@ -202,7 +414,7 @@ export function buildAtsResume(resume: string): string {
     if (!items?.length) continue;
     out.push(key);
     for (const item of items) {
-      out.push(key === "CONTATO" ? item : `- ${item}`);
+      out.push(key === "CONTATO" ? item : `• ${item}`);
     }
     out.push("");
   }
