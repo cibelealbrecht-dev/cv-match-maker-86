@@ -59,7 +59,8 @@ export function analyze(job: string, resume: string): Analysis {
   const display = new Map<string, string>();
   for (const raw of job.split(/[^A-Za-zÀ-ÿ0-9+#.-]+/)) {
     const key = normalize(raw).replace(/^[-.]+|[-.]+$/g, "");
-    if (key && !display.has(key)) display.set(key, raw);
+    const clean = raw.replace(/^[-.]+|[-.]+$/g, "");
+    if (key && clean && !display.has(key)) display.set(key, clean);
   }
 
   const resumeStems = new Set(resumeTokens.map(stem));
