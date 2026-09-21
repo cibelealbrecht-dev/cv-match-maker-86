@@ -108,11 +108,10 @@ O objetivo é melhorar a apresentação da experiência real do candidato, e nã
 
 ---
 
-# 🧠 Mega Prompt utilizado
+## 🧠 Mega Prompt utilizado
 
 O desenvolvimento inicial da aplicação foi orientado pelo seguinte prompt:
 
-```text
 # CVMatch AI — Gerador de Currículo ATS-Friendly
 
 Crie uma aplicação web chamada **CVMatch AI**, em português do Brasil.
@@ -390,3 +389,301 @@ Garantir que a aplicação seja responsiva.
 Garantir que a exportação em PDF funcione.
 
 Priorize simplicidade, clareza e funcionamento.
+
+---
+
+## 🔧 Evolução do projeto e refinamentos
+
+Após a primeira geração da aplicação, foi realizado um teste com uma descrição de vaga e um currículo de exemplo.
+
+Na primeira versão, a análise apresentou alguns problemas:
+
+- palavras genéricas apareciam como palavras-chave;
+- símbolos de Markdown, como `###`, eram identificados como termos;
+- palavras comuns eram consideradas relevantes mesmo sem representar competências profissionais;
+- o currículo ATS-friendly reproduzia elementos de Markdown, como `###`, `**` e `*`.
+
+Para corrigir esses problemas, foi solicitado um refinamento específico da lógica de análise e geração do currículo, mantendo o design e o fluxo principal da aplicação.
+
+### Refinamento solicitado
+
+Corrija apenas a lógica de análise e geração do currículo do CVMatch AI, sem alterar o design geral da aplicação.
+
+Problemas observados no teste:
+
+- A análise está considerando palavras genéricas e isoladas como palavras-chave, por exemplo: "###", "Google", "Júnior", "Criar", "Estamos", "Pessoa", "Diferentes".
+- "###" nunca deve aparecer como palavra-chave.
+- O currículo ATS-friendly está reproduzindo marcadores Markdown como "###" e "*" na versão final.
+
+Faça estas correções:
+
+1. PALAVRAS-CHAVE
+
+Identifique palavras-chave relevantes como competências, ferramentas, tecnologias, funções e conceitos profissionais relacionados à vaga.
+
+Ignore:
+
+- palavras genéricas;
+- artigos, preposições e conectivos;
+- nomes de seções Markdown;
+- símbolos;
+- "###", "*", "-", "**";
+- palavras comuns como "estamos", "pessoa", "diferentes", "criar", "buscar", "apoio", quando isoladamente não representarem uma competência;
+- palavras que aparecem apenas por serem verbos ou palavras comuns da descrição.
+
+Priorize termos profissionais como:
+
+- marketing digital;
+- Google Analytics;
+- Excel;
+- Google Sheets;
+- redes sociais;
+- análise de dados;
+- relatórios;
+- campanhas;
+- comunicação;
+- organização.
+
+Também reconheça expressões com mais de uma palavra quando fizer sentido.
+
+2. MATCH
+
+Mantenha o percentual como uma estimativa de correspondência textual entre vaga e currículo.
+
+Não trate o percentual como probabilidade de contratação.
+
+3. CURRÍCULO ATS-FRIENDLY
+
+Ao gerar o currículo, remova completamente qualquer Markdown bruto:
+
+- não mostrar "###";
+- não mostrar "**";
+- não mostrar "*" como marcador;
+- não mostrar códigos ou sintaxe Markdown.
+
+Mostrar o currículo como texto limpo e profissional, com títulos e listas visualmente organizados.
+
+4. REGRA DE VERACIDADE
+
+Continue proibido inventar experiências, competências, ferramentas, certificações, cargos ou resultados.
+
+Uma palavra da vaga só deve ser incorporada ao currículo ATS-friendly se houver evidência compatível no currículo original.
+
+5. NÃO ALTERAR
+
+Não alterar a identidade visual, layout, cores, estrutura principal ou fluxo da aplicação.
+
+Não adicionar login, banco de dados, dashboard ou outras funcionalidades.
+
+Depois da correção, manter funcionando:
+
+- Analisar currículo;
+- Match;
+- Palavras-chave encontradas;
+- Palavras-chave ausentes;
+- Sugestões;
+- Currículo ATS-friendly;
+- Copiar currículo;
+- Exportar PDF;
+- Nova análise.
+
+---
+
+## 🔍 Como a análise funciona
+
+A aplicação recebe dois textos:
+
+1. **Descrição da vaga**
+2. **Currículo**
+
+A partir desses conteúdos, a aplicação realiza uma comparação textual.
+
+O processamento considera termos profissionais relevantes, como:
+
+- competências;
+- ferramentas;
+- tecnologias;
+- funções;
+- conhecimentos;
+- conceitos profissionais;
+- expressões profissionais com mais de uma palavra.
+
+Termos genéricos, conectivos, símbolos e elementos de Markdown são ignorados.
+
+O resultado apresenta:
+
+1. percentual de correspondência;
+2. palavras-chave encontradas;
+3. palavras-chave ausentes;
+4. sugestões de melhoria;
+5. currículo reorganizado em formato ATS-friendly.
+
+A análise é determinística, portanto a mesma entrada deve produzir resultados consistentes.
+
+---
+
+## 🧪 Exemplo de uso
+
+Para validar o funcionamento da aplicação, foi utilizado um exemplo de descrição de vaga para **Analista de Marketing Digital Júnior** juntamente com um currículo de uma profissional em início de carreira na área de marketing.
+
+Após o refinamento da lógica, o teste apresentou:
+
+**Match: 50%**
+
+### Palavras-chave encontradas
+
+- Marketing Digital
+- Redes Sociais
+- Excel
+- Análise de Dados
+- Relatórios
+- Campanhas
+- Comunicação
+- Organização
+
+### Palavras-chave ausentes
+
+- Google Analytics
+- Google Sheets
+- Apresentações
+- Analista
+- Estratégias
+- Desempenho
+- Métricas
+- Equipes
+
+O currículo ATS-friendly foi gerado sem os marcadores Markdown que apareciam na primeira versão.
+
+Também foram testadas as funcionalidades de:
+
+- análise do currículo;
+- exibição do Match;
+- identificação de palavras-chave;
+- sugestões;
+- geração do currículo ATS-friendly;
+- cópia do currículo;
+- exportação em PDF;
+- nova análise.
+
+---
+
+## 📸 Print da análise e evidência de funcionamento
+
+Os prints da análise e do exemplo de uso contam muito na apresentação do projeto.
+
+A evidência de que a aplicação roda e funciona é um dos elementos mais importantes para demonstrar o projeto em um portfólio.
+
+Durante o teste, a aplicação foi executada com uma descrição de vaga e um currículo de exemplo, gerando um resultado de **50% de Match**, palavras-chave encontradas, palavras-chave ausentes e uma versão ATS-friendly do currículo.
+
+### Print da análise
+
+![Print da análise do CVMatch AI](analise.png)
+
+O print deve apresentar a aplicação em funcionamento após a análise, permitindo visualizar o resultado do Match e as informações identificadas pelo sistema.
+
+---
+
+## 🌐 Endereço da aplicação publicada
+
+A aplicação foi publicada e está disponível no seguinte endereço:
+
+**https://cv-match-maker-86.lovable.app**
+
+Esse é o endereço da aplicação publicada e funcional do CVMatch AI.
+
+---
+
+## 🔗 Repositório do projeto
+
+O código-fonte do projeto está disponível no GitHub:
+
+**https://github.com/cibelealbrecht-dev/cv-match-maker-86**
+
+Este é o repositório utilizado para armazenar o código do projeto desenvolvido no Lovable.
+
+---
+
+## 🛠️ Tecnologias utilizadas
+
+- Lovable
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+
+---
+
+## 🎨 Design
+
+A interface foi desenvolvida com foco em:
+
+- simplicidade;
+- clareza;
+- responsividade;
+- facilidade de uso;
+- aparência profissional.
+
+A aplicação utiliza azul como cor principal e diferencia visualmente correspondências, pontos de atenção e erros.
+
+O layout é adaptável para computador, tablet e celular.
+
+---
+
+## 📱 Responsividade
+
+O CVMatch AI foi projetado para funcionar em:
+
+- computadores;
+- tablets;
+- celulares.
+
+Em telas menores, os campos de entrada e os resultados são organizados verticalmente para facilitar a navegação.
+
+---
+
+## 📄 Exportação
+
+Após a análise, o usuário pode:
+
+- copiar o currículo ATS-friendly;
+- exportar o currículo em PDF;
+- iniciar uma nova análise.
+
+---
+
+## 🚫 Limitações e decisões do MVP
+
+O projeto foi mantido propositalmente simples para priorizar o funcionamento do fluxo principal.
+
+Não foram implementados:
+
+- login;
+- cadastro;
+- banco de dados;
+- dashboard;
+- histórico;
+- pagamentos;
+- integrações externas desnecessárias.
+
+O objetivo do MVP é demonstrar de forma clara o processo de comparação entre vaga e currículo e a geração de uma versão ATS-friendly.
+
+---
+
+## 🎓 Contexto do desafio
+
+Projeto desenvolvido como parte do desafio:
+
+**DIO — Riachuelo: Criando produtos com IA**
+
+O projeto busca demonstrar a aplicação prática de uma solução digital para análise e adaptação de currículos utilizando recursos de desenvolvimento assistido por IA.
+
+---
+
+## 👩‍💻 Autoria
+
+Projeto desenvolvido por **Cibele Albrecht** como atividade do desafio DIO.
+
+**CVMatch AI**
+
+*Apresentação melhor. Experiência verdadeira.*
