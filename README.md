@@ -569,15 +569,13 @@ Também foram testadas as funcionalidades de:
 
 ## 📸 Print da análise e evidência de funcionamento
 
-Os prints da análise e do exemplo de uso contam muito na apresentação do projeto.
-
 A evidência de que a aplicação roda e funciona é um dos elementos mais importantes para demonstrar o projeto em um portfólio.
 
 Durante o teste, a aplicação foi executada com uma descrição de vaga e um currículo de exemplo, gerando um resultado de **50% de Match**, palavras-chave encontradas, palavras-chave ausentes e uma versão ATS-friendly do currículo.
 
 ### Print da análise
 
-![Print da análise do CVMatch AI](analise.png)
+![Print da análise do CVMatch AI](TESTE-50%25-MATCH.jpg)
 
 O print deve apresentar a aplicação em funcionamento após a análise, permitindo visualizar o resultado do Match e as informações identificadas pelo sistema.
 
